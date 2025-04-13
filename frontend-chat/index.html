@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Guidance Chatbot</title>
+    <link rel="icon" href="data:,">
+    <style>
+        #chatbox {
+            width: 600px;
+            height: 400px;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            padding: 10px;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .user { color: blue; }
+        .chatbot { color: green; }
+        #input-container {
+            width: 600px;
+            margin: 0 auto;
+            display: flex;
+        }
+        #input {
+            flex-grow: 1;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        #send {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #send:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox"></div>
+    <div id="input-container">
+        <input id="input" type="text" placeholder="Type your message...">
+        <button id="send">Send</button>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const input = document.getElementById('input');
+        const send = document.getElementById('send');
+        let threadId = null;  // Store the thread_id from /start
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.textContent = `${sender === 'user' ? 'You' : 'Chatbot'}: ${text}`;
+            chatbox.appendChild(div);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+        // function showError(message) {
+        //     errorDiv.textContent = message;
+        // }
+
+        send.addEventListener('click', async () => {
+            const userMessage = input.value.trim();
+            if (!userMessage) return;
+            if (!threadId) {
+                console.log("No active conversation. Please refresh to start again.");
+                return;
+            }
+            addMessage(userMessage, 'user');
+            input.value = '';
+
+            try{
+
+                // Send to backend
+                const response = await fetch('http://localhost:8000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: threadId, message: userMessage }),
+                });
+                if (!response.ok) {
+                    throw new Error(`Chat request failed: ${response.statusText}`);
+                }
+                const data = await response.json();
+                addMessage(data.message, 'chatbot');
+                if (!data.is_ongoing) {
+                    send.disabled = true;  // Disable send button when conversation ends
+                }
+            }catch (error) {
+                console.log(`Error: ${error.message}`);
+            }
+        });
+
+        // Fetch initial message
+        async function startChat() {
+            try{
+
+                const response = await fetch('http://localhost:8000/start', { method: 'GET' });
+                if (!response.ok) {
+                    throw new Error(`Start request failed: ${response.statusText}`);
+                }
+                const data = await response.json();
+                threadId = data.thread_id;
+                addMessage(data.message, 'chatbot');
+            }catch (error) {
+                console.log(`Error starting conversation: ${error.message}`);
+            }
+        }
+
+        startChat();
+    </script>
+</body>
+</html>
