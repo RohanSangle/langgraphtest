@@ -29,9 +29,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# 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
-
-
 # Define state
 class State(TypedDict):
     messages: Annotated[list, add_messages]
