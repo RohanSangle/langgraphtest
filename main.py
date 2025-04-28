@@ -46,7 +46,7 @@ initial_careers = [
 ]
 
 # Initialize Groq LLM (replace with your API key)
-llm = ChatGroq(model="llama3-8b-8192", api_key="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", temperature=0.7)
+llm = ChatGroq(model="llama3-8b-8192", api_key="YOUR_GROQ_API_KEY_FROM_.ENV", temperature=0.7)
 
 # Human assistance tool
 @tool

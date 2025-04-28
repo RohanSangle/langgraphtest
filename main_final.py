@@ -37,7 +37,7 @@ class CareerState(TypedDict):
     answer_question_response: Optional[str]
 
 # --- 2) Initialize LLM client ---
-os.environ.setdefault("GROQ_API_KEY", "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")
+os.environ.setdefault("GROQ_API_KEY", "YOUR_GROQ_API_KEY_FROM_.ENV")
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
     temperature=0.7,
